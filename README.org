@@ -5,4 +5,4 @@
    You can either get a binary or compile it.
 
 ** Example
-   =tail -F /some/log/file | grep "logfileProperty" | pub -c "logline"
+   =tail -F /some/log/file | grep "logfileProperty" | pub -c "logline"=
