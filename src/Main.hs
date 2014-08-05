@@ -27,14 +27,13 @@ import           Pub.Internal
 -- number is configured here.
 programArgs :: PArgs
 programArgs = PArgs
-    { chan  = def &= help "Channel to publish on"
-    , host  = def &= help "Redis host"
-    , port  = def &= help "Redis port"
-    , db    = def &= help "Redis database (default 0)"
+    { chan  = def &= argPos 0 &= typ "CHANNEL"
+    , host  = def &= name "h" &= typ "STRING" &= help "Redis host (default `localhost`)"
+    , port  = def &= name "p" &= help "Redis port (default `6379`)"
+    , db    = def &= name "d" &= help "Redis database (default `0`)"
     } &=
     verbosity &=
     help    "Pipe stdin to a pub/sub channel." &=
-    helpArg [name "h"] &=
     summary ("pub v" ++ showVersion version) &=
     noAtExpand &=
     details ["Given an input on stdin, pipe to a redis pub/sub channel."]

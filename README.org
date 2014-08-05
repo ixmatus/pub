@@ -1,6 +1,5 @@
 * Welcome!
-  This little CLI utility simply pipes from stdin to a redis pub/sub
-  channel.
+  This CLI utility pipes from stdin to a redis pub/sub channel.
 
 ** Install
    You can either get a binary or compile it.
