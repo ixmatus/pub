@@ -15,7 +15,7 @@
 module Main where
 
 import           Data.Version           (showVersion)
-import           Paths_pub_parse        (version)
+import           Paths_pub              (version)
 import           System.Console.CmdArgs
 
 import           Pub

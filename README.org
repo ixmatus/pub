@@ -1,0 +1,9 @@
+* Welcome!
+  This little CLI utility simply pipes from stdin to a redis pub/sub
+  channel.
+
+** Install
+   You can either get a binary or compile it.
+
+** Example
+   =tail -F /some/log/file | grep "logfileProperty" | pub -c "logline"

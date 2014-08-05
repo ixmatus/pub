@@ -13,23 +13,17 @@
 
 module Pub where
 
-import           Control.Monad
 import           Data.Maybe
-import           Data.Text                 (Text, unpack)
 import           Database.Redis
-import           Filesystem.Path.CurrentOS as FS
 import           Pipes
-import qualified Pipes.ByteString          as PB
-import           System.IO
-import           System.Log.Logger
-import           Text.Groom                (groom)
+import qualified Pipes.ByteString as PB
 
 import           Pub.Internal
 
 pipePublish :: Settings -> IO ()
 pipePublish s = do
     cn <- connect conn
-    runEffect $ PB.stdin >-> redisPub cn (channel s)
+    runEffect $ PB.stdin >-> redisPub cn (channel s) >-> showResult
   where
     conn = defaultConnectInfo {
         connectHost     = fromMaybe
@@ -43,7 +37,12 @@ pipePublish s = do
                             (redisDB s)
     }
 
+showResult :: Consumer (Either Reply Integer) IO ()
+showResult = await >>= (liftIO . print . show)
+
+redisPub :: Connection -> PB.ByteString -> Pipe PB.ByteString (Either Reply Integer) IO ()
 redisPub conn c = do
     inp <- await
-    liftIO $ runRedis conn $ do
+    r   <- liftIO $ runRedis conn $ do
         publish c inp
+    yield r

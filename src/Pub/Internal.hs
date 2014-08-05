@@ -19,30 +19,29 @@
 
 module Pub.Internal where
 
-import qualified Data.ByteString.Char8  as C8
-import           Database.Redis
+import           Control.Applicative
+import qualified Data.ByteString.Char8   as C8
+import           Database.Redis          as R
+import           Network.Socket.Internal as NSI (PortNumber)
 import           System.Console.CmdArgs
 import           System.Log.Logger
-import           Text.Groom             (groom)
+import           Text.Groom              (groom)
 
 -- | Data type for program CLI options.
 data PArgs = PArgs
-    { chan :: Maybe C8.ByteString
+    { chan :: String
     , host :: Maybe String
-    , port :: Maybe PortID
-    , db   :: Maybe Int
-    } deriving (Typeable, Show, Eq)
-
-deriving instance Typeable PortID
-
+    , port :: Maybe Integer
+    , db   :: Maybe Integer
+    } deriving (Data, Typeable, Show, Eq)
 
 -- | Data type for settings once merged from CLI.
 data Settings = Settings
     { loglevel  :: !Priority
-    , channel   :: Maybe C8.ByteString
+    , channel   :: C8.ByteString
     , redisHost :: Maybe HostName
     , redisPort :: Maybe PortID
-    , redisDB   :: Maybe Int
+    , redisDB   :: Maybe Integer
     } deriving (Show, Eq)
 
 -- | Given options, set the logging level, and create the settings
@@ -52,10 +51,12 @@ handleOpts cliopts = do
     whenNormal $ updateGlobalLogger "Console" (setLevel ERROR)
     whenLoud   $ updateGlobalLogger "Console" (setLevel DEBUG)
 
-    let conf = Settings { loglevel  = INFO
-                        , channel   = chan cliopts
+    let c    = C8.pack $ chan cliopts
+        p    = (fromInteger <$> (port cliopts)) :: Maybe NSI.PortNumber
+        conf = Settings { loglevel  = INFO
+                        , channel   = c
                         , redisHost = host cliopts
-                        , redisPort = port cliopts
+                        , redisPort = R.PortNumber <$> p
                         , redisDB   = db cliopts
                         }
 
