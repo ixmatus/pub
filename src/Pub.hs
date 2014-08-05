@@ -23,7 +23,7 @@ import           Pub.Internal
 pipePublish :: Settings -> IO ()
 pipePublish s = do
     cn <- connect conn
-    runEffect $ PB.stdin >-> redisPub cn (channel s) >-> showResult
+    runEffect $ PB.stdin >-> redisPub cn (channel s)
   where
     conn = defaultConnectInfo {
         connectHost     = fromMaybe
@@ -40,9 +40,5 @@ pipePublish s = do
 showResult :: Consumer (Either Reply Integer) IO ()
 showResult = await >>= (liftIO . print . show)
 
-redisPub :: Connection -> PB.ByteString -> Pipe PB.ByteString (Either Reply Integer) IO ()
-redisPub conn c = do
-    inp <- await
-    r   <- liftIO $ runRedis conn $ do
-        publish c inp
-    yield r
+redisPub :: Connection -> PB.ByteString -> Consumer PB.ByteString IO ()
+redisPub conn c = for cat $ \v -> liftIO $ (runRedis conn $ do publish c v) >> return ()
