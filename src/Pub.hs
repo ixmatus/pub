@@ -14,43 +14,36 @@
 module Pub where
 
 import           Control.Monad
-import           Control.Monad.State.Strict
-import           Data.Attoparsec.Text
-import           Data.Text                  (Text, unpack)
+import           Data.Maybe
+import           Data.Text                 (Text, unpack)
 import           Database.Redis
-import           Filesystem.Path.CurrentOS  as FS
+import           Filesystem.Path.CurrentOS as FS
 import           Pipes
-import qualified Pipes.Prelude              as PP
+import qualified Pipes.ByteString          as PB
 import           System.IO
 import           System.Log.Logger
-import           Text.Groom                 (groom)
+import           Text.Groom                (groom)
 
 import           Pub.Internal
 
 pipePublish :: Settings -> IO ()
 pipePublish s = do
     cn <- connect conn
-    runEffect $ PP.stdin >-> toChannel
+    runEffect $ PB.stdin >-> redisPub cn (channel s)
   where
-    conn      = defaultConnectInfo
-    toChannel = redisPub
+    conn = defaultConnectInfo {
+        connectHost     = fromMaybe
+                            (connectHost defaultConnectInfo)
+                            (redisHost s)
+      , connectPort     = fromMaybe
+                            (connectPort defaultConnectInfo)
+                            (redisPort s)
+      , connectDatabase = fromMaybe
+                            (connectDatabase defaultConnectInfo)
+                            (redisDB s)
+    }
 
 redisPub conn c = do
     inp <- await
-    runRedis conn $ do
+    liftIO $ runRedis conn $ do
         publish c inp
-
-
-parsingPipe :: Monad m => Producer Text m () -> m ParseResult
-parsingPipe i = evalStateT (PA.parse (many1 seriesBlockParser)) i
-
-unwrapParse :: ParseResult -> IO ()
-unwrapParse Nothing  = print ("Nothing here..." :: String)
-unwrapParse (Just v) = mapM_ fmt out
-  where
-    fmt s = do
-      debugM "Console" $ (groom s ++ "\n")
-      putStrLn $ (unpack $ seriesName s) ++ ": " ++ (show $ seriesSQC s)
-    out   = case v of
-              Left _  -> []
-              Right s -> fmap statQuality s

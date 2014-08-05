@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  StatParse.Internal
+-- Module      :  Pub.Internal
 -- Copyright   :  (C) 2014 Parnell Springmeyer
 -- License     :  AllRightsReserved
 -- Maintainer  :  Parnell Springmeyer <parnell@digitalmentat.com>
@@ -14,33 +14,32 @@
 {-# LANGUAGE DataKinds          #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Pub.Internal where
 
-import           Control.Applicative
-import           Data.Maybe
-import qualified Data.Text                 as T
-import qualified Data.Vector               as V
+import qualified Data.ByteString.Char8  as C8
 import           Database.Redis
-import           Filesystem.Path.CurrentOS as FS
-import           Statistics.Sample
 import           System.Console.CmdArgs
 import           System.Log.Logger
-import           Text.Groom                (groom)
+import           Text.Groom             (groom)
 
 -- | Data type for program CLI options.
 data PArgs = PArgs
-    { chan :: Maybe String
+    { chan :: Maybe C8.ByteString
     , host :: Maybe String
-    , port :: Maybe String
+    , port :: Maybe PortID
     , db   :: Maybe Int
-    } deriving (Data, Typeable, Show, Eq)
+    } deriving (Typeable, Show, Eq)
+
+deriving instance Typeable PortID
+
 
 -- | Data type for settings once merged from CLI.
 data Settings = Settings
     { loglevel  :: !Priority
-    , channel   :: Maybe String
+    , channel   :: Maybe C8.ByteString
     , redisHost :: Maybe HostName
     , redisPort :: Maybe PortID
     , redisDB   :: Maybe Int
@@ -56,7 +55,7 @@ handleOpts cliopts = do
     let conf = Settings { loglevel  = INFO
                         , channel   = chan cliopts
                         , redisHost = host cliopts
-                        , redisPort = fmap PortNumber $ port cliopts
+                        , redisPort = port cliopts
                         , redisDB   = db cliopts
                         }
 

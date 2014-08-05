@@ -36,6 +36,7 @@ Executable pub
     containers                >= 0.5.0.0  && < 0.6,
     hedis                     >= 0.6      && < 0.7,
     pipes                     >= 4.1.1    && < 4.2,
+    pipes-bytestring          >= 2        && < 3,
     mtl                       >= 2.1      && < 2.3,
     system-filepath           >= 0.4.12   && < 0.5,
     groom                     >= 0.1.2    && < 0.2,
@@ -48,9 +49,7 @@ Test-Suite tests
   Hs-Source-Dirs:       test, src
   Ghc-Options:          -Wall
   Main-Is:              Test.hs
-  Other-Modules:
-    StatParse.Internal,
-    StatParse.Attoparsec
+  Other-Modules:        Pub.Internal
 
   Build-Depends:
     base                       >= 4.4      && < 5,
