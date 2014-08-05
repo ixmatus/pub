@@ -37,8 +37,5 @@ pipePublish s = do
                             (redisDB s)
     }
 
-showResult :: Consumer (Either Reply Integer) IO ()
-showResult = await >>= (liftIO . print . show)
-
 redisPub :: Connection -> PB.ByteString -> Consumer PB.ByteString IO ()
 redisPub conn c = for cat $ \v -> liftIO $ (runRedis conn $ do publish c v) >> return ()
