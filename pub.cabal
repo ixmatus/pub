@@ -6,7 +6,16 @@ License:                BSD3
 License-File:           LICENSE
 Synopsis:               Pipe stdin to a redis pub/sub channel
 
-Description:            Pipe stdin to a redis pub/sub channel.
+Description:
+
+  `pub` is an executable for piping data from stdin to a specified
+  Redis pub/sub channel.
+  .
+  A typical use for this tool is to tail a log file, match a specific
+  line with grep, and pipe it into Redis where multiple consumers can
+  do something different with each incoming log line:
+  .
+  > tail -F /var/log/somelogfile.log | grep "tracker.gps.parsed" | pub loglines
 
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
