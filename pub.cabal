@@ -1,5 +1,5 @@
 Name:                   pub
-Version:                2.0.0
+Version:                2.0.1
 Author:                 Parnell Springmeyer <parnell@digitalmentat.com>
 Maintainer:             Parnell Springmeyer <parnell@digitalmentat.com>
 License:                BSD3
@@ -17,6 +17,11 @@ Description:
   do something different with each incoming log line:
   .
   > tail -F /var/log/somelogfile.log | grep "tracker.gps.parsed" | pub loglines
+  .
+  It also comes with a utility named `sub` for piping from a Redis
+  pub/sub channel to stdout:
+  .
+  > sub loglines | grep "somemsg"
 
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
