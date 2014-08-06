@@ -1,10 +1,11 @@
 Name:                   pub
-Version:                1.0.0
+Version:                1.0.1
 Author:                 Parnell Springmeyer <parnell@digitalmentat.com>
 Maintainer:             Parnell Springmeyer <parnell@digitalmentat.com>
 License:                BSD3
 License-File:           LICENSE
 Synopsis:               Pipe stdin to a redis pub/sub channel
+Category:               Utility
 
 Description:
 
@@ -28,7 +29,7 @@ Data-Files:
 Executable pub
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
-  GHC-Options:          -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
+  GHC-Options:          -threaded -Wall -fwarn-tabs -funbox-strict-fields
                         -fno-warn-orphans -fno-warn-unused-do-bind -rtsopts -with-rtsopts=-N
   Main-Is:              Main.hs
   Other-Modules:        Pub.Internal
