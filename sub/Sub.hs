@@ -17,6 +17,7 @@ import qualified Data.ByteString.Char8 as C8
 import           Data.Maybe
 import           Data.Monoid           (mempty)
 import           Database.Redis
+import           System.IO
 
 import           Sub.Internal
 
@@ -40,5 +41,7 @@ pipePublish s = do
 redisSub :: Connection -> C8.ByteString -> IO ()
 redisSub conn c = do
     runRedis conn $ do
-        pubSub (subscribe [c]) $ \msg -> (C8.putStrLn $ msgMessage msg) >> return mempty
+        pubSub (subscribe [c]) outputHandler
+  where
+    outputHandler msg = (C8.putStrLn $ msgMessage msg) >> hFlush stdout >> return mempty
 
