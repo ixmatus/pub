@@ -36,7 +36,7 @@ programArgs = PArgs
     help    "Pipe from a pub/sub channel to stdout." &=
     summary ("sub v" ++ showVersion version) &=
     noAtExpand &=
-    details ["Given a redis sub/sub channel, pipe to stdout."]
+    details ["Given a redis pub/sub channel, pipe to stdout."]
 
 main :: IO ()
 main = cmdArgs programArgs >>= handleOpts >>= pipePublish

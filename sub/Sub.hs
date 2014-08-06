@@ -40,5 +40,5 @@ pipePublish s = do
 redisSub :: Connection -> C8.ByteString -> IO ()
 redisSub conn c = do
     runRedis conn $ do
-        pubSub (subscribe [c]) $ \msg -> (C8.putStr $ msgMessage msg) >> return mempty
+        pubSub (subscribe [c]) $ \msg -> (C8.putStrLn $ msgMessage msg) >> return mempty
 
