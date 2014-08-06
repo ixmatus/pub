@@ -1,8 +1,18 @@
 * Welcome!
-  This CLI utility pipes from stdin to a redis pub/sub channel.
+  =Pub= builds two utilities for piping to and from a redis pub/sub
+  channel and stdout/stdin.
 
 ** Install
-   You can either get a binary or compile it.
+   Right now, you gotta compile it.
 
-** Example
-   =tail -F /some/log/file | grep "logfileProperty" | pub -c "logline"=
+** Examples
+
+*** Using pub
+    #+BEGIN_SRC
+    tail -F /some/log/file | grep "logfileProperty" | pub "logline"
+    #+END_SRC
+
+*** Using sub
+    #+BEGIN_SRC
+    sub "logline" | grep "somethingspecific"
+    #+END_SRC
