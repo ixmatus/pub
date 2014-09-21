@@ -6,7 +6,7 @@
   channel and stdout/stdin.
 
 ** Install
-   Right now, you gotta compile it.
+   =cabal install pub=
 
 ** Examples
 
