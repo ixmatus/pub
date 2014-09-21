@@ -1,5 +1,5 @@
 * Welcome!
-  [[https://img.shields.io/hackage/v/pub.svg?style=flat][https://hackage.haskell.org/package/pub]]
+  [[https://hackage.haskell.org/package/pub][https://img.shields.io/hackage/v/pub.svg?style=flat]]
 
   =Pub= builds two utilities for piping to and from a redis pub/sub
   channel and stdout/stdin.
