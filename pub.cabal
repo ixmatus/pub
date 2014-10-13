@@ -1,5 +1,5 @@
 Name:                   pub
-Version:                2.0.1
+Version:                2.0.2
 Author:                 Parnell Springmeyer <parnell@digitalmentat.com>
 Maintainer:             Parnell Springmeyer <parnell@digitalmentat.com>
 License:                BSD3
@@ -9,6 +9,8 @@ Category:               Utility
 
 Description:
 
+  <<https://travis-ci.org/ixmatus/pub.svg?branch=master>>
+  .
   `pub` is an executable for piping data from stdin to a specified
   Redis pub/sub channel.
   .
