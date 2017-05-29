@@ -5,38 +5,60 @@
 -- License     :  AllRightsReserved
 -- Maintainer  :  Parnell Springmeyer <parnell@digitalmentat.com>
 -- Stability   :  stable
---
--- This is the entry point for the `pub` executable. Main sets up
--- the cli options configuration and parses configuration file options.
 ----------------------------------------------------------------------------
 
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE FlexibleInstances  #-}
+{-# LANGUAGE LambdaCase         #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE RecordWildCards    #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeOperators      #-}
 
 module Main where
 
-import           Data.Version           (showVersion)
-import           Paths_pub              (version)
-import           System.Console.CmdArgs
+import           Control.Monad
+import           Data.ByteString  (ByteString)
+import           Data.Maybe
+import           Data.Version     (showVersion)
+import qualified Database.Redis   as Redis
+import           Options.Generic
+import qualified Paths_pub        as Pub
+import           Pipes
+import qualified Pipes.ByteString
+import qualified System.IO
 
-import           Pub
-import           Pub.Internal
+data Options w = Options
+  { channel :: w ::: ByteString    <?> "Redis channel to publish to"
+  , host    :: w ::: Maybe String  <?> "Redis host (default: localhost)"
+  , port    :: w ::: Maybe Integer <?> "Redis post (default: 6379)"
+  , db      :: w ::: Maybe Integer <?> "Redis db   (default: 0)"
+  , version :: Bool
+  } deriving (Generic)
 
--- | Command line argument configuration.
---
--- Help messages, switches, options, and the human-readable version
--- number is configured here.
-programArgs :: PArgs
-programArgs = PArgs
-    { chan  = def &= argPos 0 &= typ "CHANNEL"
-    , host  = def &= name "h" &= typ "STRING" &= help "Redis host (default `localhost`)"
-    , port  = def &= name "p" &= help "Redis port (default `6379`)"
-    , db    = def &= name "d" &= help "Redis database (default `0`)"
-    } &=
-    verbosity &=
-    help    "Pipe stdin to a pub/sub channel." &=
-    summary ("pub v" ++ showVersion version) &=
-    noAtExpand &=
-    details ["Given an input on stdin, pipe to a redis pub/sub channel."]
+instance ParseRecord (Options Wrapped)
+deriving instance Show (Options Unwrapped)
 
 main :: IO ()
-main = cmdArgs programArgs >>= handleOpts >>= pipePublish
+main = do
+  Options{..} <- unwrapRecord "Pipe stdin to a redis pub/sub channel"
+  let stderr = System.IO.stderr
+  when version $
+    System.IO.hPutStrLn stderr (showVersion Pub.version)
+  conn <-
+    Redis.connect
+      Redis.defaultConnectInfo
+       { Redis.connectHost     = (fromMaybe "localhost" host)
+       , Redis.connectPort     = Redis.PortNumber (fromInteger $ fromMaybe 6379 port)
+       , Redis.connectDatabase = fromMaybe 0 db
+       }
+
+  let publish =
+        (\value ->
+          -- TODO: should we use runRedis here!?!?
+          lift (Redis.runRedis conn $ Redis.publish channel value) >>= \case
+            Left reply -> lift (System.IO.hPutStrLn stderr $ show reply)
+            Right _    -> pure ())
+
+  runEffect (for Pipes.ByteString.stdin publish)
